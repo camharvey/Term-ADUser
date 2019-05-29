@@ -1,0 +1,43 @@
+<#
+Working Progress of the ADTermScript can be found in ADTermScript.ps1
+This document highlights what specific tasks the script should do and brainstorms how to go about it
+ 
+Script needs to do the following:
+1. Move AD Account to "Active but Gone" OU
+
+Move-ADObject ` 
+-Identity "CN=Cameron Harvey,OU=Corporate Accounts,OU=Users,OU=SecureLink,DC=sl,DC=lan" `
+-TargetPath "OU=Active but Gone,OU=Users,OU=SecureLink,DC=sl,DC=lan" -WhatIf
+
+#Another idea
+
+Get-ADUser $name| Move-ADObject -TargetPath 'OU=nonactive,OU=compny,DC=domain,Dc=net'
+
+2. Reset Password to a Randomly Generated Password
+
+$newPass = [system.web.security.membership]::GeneratePassword(10,1) #This is an example
+
+3. Set Primary AD Group to "Domain Users"
+ 
+Set-ADUser -Replace @{primaryGroupID="513"}
+
+4. Revoke AD Group Membership
+
+Get-ADUser -Identity $User -Properties MemberOf | ForEach-Object {
+    $_.MemberOf | Remove-ADGroupMember -Members $_.DistinguishedName -Confirm
+}
+
+5. Revoke Badge Access
+
+
+
+6. Disable Account after above has been completed.
+
+Set-ADUser -Identity 4User -Enabled:$false
+
+OR
+
+Disable-ADAccount -Identity $User
+
+7. Move Account to "Disabled Accounts" OU
+#>
