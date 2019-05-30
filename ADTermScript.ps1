@@ -15,12 +15,21 @@ function Term-ADUser {
     PROCESS {
         foreach ($user in $username) {
             if ($pscmdlet.ShouldProcess($user)) {
+                #Running valid user checks before proceeding with actions
                 $Query = Get-ADUser -LDAPFilter "(samAccountName=$user)"
-                if ($Query -eq $null)
+                if ($Query -eq $null) #Catches if $user does not exist in AD
                 { 
                     Write-Warning "User '$user' does not exist"
                 }
-                else
+                 elseif ($Query.DistinguishedName.Split("=")[2].split(",")[0] -ne "Corporate Accounts" ) #Catches $user not in Corporate Accounts OU
+                {
+                    Write-Warning "User '$user' is not in the Corporate Accounts OU"
+                }
+                elseif ($Query.Enabled -eq $false) #Catches $user if they're already disabled 
+                {
+                    Write-Warning "User '$user' is already disabled"
+                }
+                else #Runs termination tasks if $user passes above checks
                 { 
                     Write-Verbose "User '$user' exists"
                     #Moving $user to Active but Gone OU"
