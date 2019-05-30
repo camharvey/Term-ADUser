@@ -3,6 +3,12 @@ Working Progress of the ADTermScript can be found in ADTermScript.ps1
 This document highlights what specific tasks the script should do and brainstorms how to go about it
  
 Script needs to do the following:
+Prerequisites the user in question should have before proceeding with PROCESS block
+A) User exists in AD
+B) User is already in the "Corporate Accounts" OU
+C) User is NOT disabled
+
+
 1. Move AD Account to "Active but Gone" OU
 
 Move-ADObject ` 
