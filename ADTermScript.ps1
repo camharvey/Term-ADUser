@@ -33,20 +33,20 @@ function Term-ADUser {
                 { 
                     Write-Verbose "User '$user' exists"
                     #Moving $user to Active but Gone OU"
-                    $Query | Move-ADObject -TargetPath "OU=Active but Gone,OU=Users,OU=SecureLink,DC=sl,DC=lan"
+                    Get-ADUser -Identity $user | Move-ADObject -TargetPath "OU=Active but Gone,OU=Users,OU=SecureLink,DC=sl,DC=lan"
                     #Resetting password to a randomly generated password
                     $NewPass = [system.web.security.membership]::GeneratePassword(16,1) | ConvertTo-SecureString -AsPlainText -Force
-                    Set-ADAccountPassword -Identity $Query -NewPassword $NewPass -Reset
+                    Set-ADAccountPassword -Identity $user -NewPassword $NewPass -Reset
                     #Set Primary AD Group to Domain Users & Revoke Badge Access
-                    Set-ADUser -Replace @{primaryGroupID="513"; gtecFacilityCode=555; gtecAccessCard=55555; gtecAccessPin=55555}
+                    Set-ADUser -Identity $user -Replace @{primaryGroupID="513"; gtecFacilityCode=555; gtecAccessCard=55555; gtecAccessPin=55555}
                     #Remove AD Group Memberships of $user
-                    Get-ADUser $Query -Properties MemberOf | ForEach-Object {
+                    Get-ADUser $user -Properties MemberOf | ForEach-Object {
                         $_.MemberOf | Remove-ADGroupMember -Members $_.DistinguishedName -Confirm 
                     }
                     #Disable AD Account for $user
-                    Disable-ADAccount -Identity $Query
+                    Disable-ADAccount -Identity $user
                     #Move $user to "Disable Accounts" OU
-                    $Query | Move-ADObject -TargetPath "OU=Disabled Accounts,OU=Users,OU=SecureLink,DC=sl,DC=lan"
+                    Get-ADUser -Identity $user | Move-ADObject -TargetPath "OU=Disabled Accounts,OU=Users,OU=SecureLink,DC=sl,DC=lan"
                 }
             }
         }
